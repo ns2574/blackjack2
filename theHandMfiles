@@ -1,0 +1,435 @@
+//
+//  Card.h
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+typedef enum {
+    
+    Hearts,
+    
+    Spades,
+    
+    Diamonds,
+    
+    Clubs
+    
+} Suit;
+
+@interface Card : NSObject {
+}
+
+@property NSInteger cardNum;
+
+@property Suit suit;
+
+-(id) initWithCardNumber:(NSInteger) aCardNum suit:(Suit) aSuit;
+
+-(NSInteger) strength;
+
+@end
+
+
+
+//
+//
+//
+//
+//  Card.m
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import "Card.h"
+
+@implementation Card
+
+@synthesize suit = _suit, cardNum=_cardNum;
+
+-(id) initWithCardNumber:(NSInteger)aCardNum suit:(Suit)aSuit {
+    if (self = [super init])
+    {
+        _suit = aSuit;
+        _cardNum = aCardNum;
+        
+    }
+    return self;
+}
+
+
+-(NSInteger) strength {
+    if (_cardNum>=10)
+        return (10);
+    else if (_cardNum==1)
+        return (11);
+    else
+        return (_cardNum);
+}
+
+
+-(NSString *) suitAsString{
+    switch (_suit) {
+        case Hearts:
+            return @"Hearts";
+            break;
+        case Spades:
+            return @"Spades";
+            break;
+        case Diamonds:
+            return @"Diamonds";
+            break;
+        case Clubs:
+            return @"Clubs";
+            break;
+        default:
+            return nil;
+            break;
+    }
+}
+
+
+-(NSString *) cardNumberAsString{
+    switch (_cardNum) {
+        case 1:
+            return @"Ace";
+            break;
+        case 11:
+            return @"Jack";
+            break;
+        case 12:
+            return @"Queen";
+            break;
+        case 13:
+            return @"King";
+            break;
+        default:
+            return [NSString stringWithFormat:@"%d", _cardNum];
+            break;
+    }
+}
+
+-(NSString *) description {
+    return [NSString stringWithFormat:@"%@%@ (strength = %d)", [self suitAsString], [self cardNumberAsString], [self strength]];
+}
+
+@end
+
+
+//
+//
+//
+//
+//  Deck.h
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@class Card;
+
+@interface Deck : NSObject {
+    NSMutableArray *cards;
+}
+
+-(Card *) draw;
+
+-(void) shuffle;
+
+@end
+
+
+//
+//
+//
+//
+//  Deck.m
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import "Deck.h"
+
+#import "Card.h"
+
+@implementation Deck
+
+-(id) init {
+    if (self = [super init])
+    {
+        cards = [[NSMutableArray alloc] init];
+        
+        for (int suit = 0; suit <= 3; suit++)
+        {
+            for (int cardNum = 1; cardNum <= 13; cardNum++)
+            {
+                [cards addObject:[[Card alloc] initWithCardNumber:cardNum suit:suit]];
+            }
+        }
+        
+        [self shuffle];
+    }
+    return self;
+}
+
+-(Card *) draw {
+    if ([cards count]>0)
+    {
+        Card* tCard = [cards lastObject];
+        [cards removeLastObject];
+        return tCard;
+    }
+    return nil;
+}
+
+-(void) shuffle {
+    NSUInteger count = [cards count];
+    for (NSUInteger i = 0; i < count; ++i) {
+        // Select a random element between i and end of array to swap with.
+        int nElements = count - i;
+        int n = (arc4random() % nElements) + i;
+        [cards exchangeObjectAtIndex:i withObjectAtIndex:n];
+    }
+}
+
+- (NSString *)description{
+    return [NSString stringWithFormat:@"Deck : %@", cards];
+}
+
+@end
+
+
+//
+//
+//
+//
+//  Hand.h
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@class Card;
+
+@interface Hand : NSObject {
+}
+
+@property NSMutableArray *cardsInHand;
+
+-(void) addCard:(Card *)card;
+
+-(NSInteger) getStrength;
+
+-(NSInteger) countCards;
+
+-(Card *) getCardAtIndex:(NSInteger) index;
+
+@end
+
+
+//
+//
+//
+//
+//  Hand.m
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import "Hand.h"
+
+#import "Card.h"
+
+@implementation Hand
+
+-(id) init {
+    if ((self = [super init])){
+        self.cardsInHand = [[NSMutableArray alloc] initWithCapacity:2];
+    }
+    return (self);
+    
+}
+
+-(NSInteger) countCards {
+    return ([self.cardsInHand count]);
+}
+
+-(void) addCard:(Card *)card {
+    [self.cardsInHand addObject:card];
+}
+
+-(NSInteger) getStrength {
+    NSInteger aVal = 0;
+    for (Card *tCard in self.cardsInHand) {
+        aVal = aVal + [tCard strength];
+    }
+    return aVal;
+}
+
+-(Card *) getCardAtIndex:(NSInteger) index
+{
+    return ([self.cardsInHand objectAtIndex:index]);
+}
+
+-(NSString *)description{
+    return [NSString stringWithFormat:@"cards in hand : %@", self.cardsInHand];
+}
+
+@end
+
+
+
+
+//
+//
+////
+//  ViewController.h
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ViewController : UIViewController
+
+
+@end
+
+
+//
+//
+//
+//
+//  theModel.h
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+#import "Deck.h"
+#import "Hand.h"
+
+
+@interface TheModel : NSObject {
+    Hand *dealerHand;
+    
+    Hand *playerHand;
+    
+    Deck *deck;
+}
+
+@property Hand *dealerHand;
+
+@property Hand *playerHand;
+
+@property Deck *deck;
+
+-(void) setup;
+
+@end
+
+
+
+//
+//
+//
+//
+//  theModel.m
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import "theModel.h"
+
+@implementation TheModel
+
+@synthesize playerHand = _playerHand;
+@synthesize dealerHand = _dealerHand;
+@synthesize deck = _deck;
+
+
+-(id) init {
+    if ((self = [super init])){
+        _deck = [[Deck alloc] init];
+        _playerHand = [[Hand alloc] init];
+        _dealerHand = [[Hand alloc] init];
+    }
+    return (self);
+}
+
+-(void)setup
+{
+    //deal cards
+    [_playerHand addCard:[_deck draw]];
+    [_dealerHand addCard:[_deck draw]];
+    [_playerHand addCard:[_deck draw]];
+    [_dealerHand addCard:[_deck draw]];
+    
+    NSLog ([NSString stringWithFormat:@"Player:%@", _playerHand.description] );
+    NSLog ([NSString stringWithFormat:@"Dealer:%@", _dealerHand.description] );
+    
+}
+
+@end
+
+
+//
+//
+//
+//  ViewController.m
+//  blackjack
+//
+//  Created by Niela Sultana on 10/6/14.
+//  Copyright (c) 2014 Niela Sultana. All rights reserved.
+//
+
+#import "ViewController.h"
+
+#import "Deck.h"
+
+#import "theModel.h"
+
+@interface ViewController ()
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    TheModel *aModel = [[TheModel alloc ] init];
+    [aModel setup];
+
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end
+
+
